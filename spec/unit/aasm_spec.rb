@@ -151,7 +151,7 @@ describe AASM, '- event firing with persistence' do
   it 'should fire the Event' do
     foo = Foo.new
 
-    Foo.aasm_events[:close].should_receive(:fire).with(foo)
+    Foo.aasm_events[:close].should_receive(:fire).with(foo, nil)
     foo.close!
   end
 
@@ -219,7 +219,7 @@ describe AASM, '- event firing without persistence' do
   it 'should fire the Event' do
     foo = Foo.new
 
-    Foo.aasm_events[:close].should_receive(:fire).with(foo)
+    Foo.aasm_events[:close].should_receive(:fire).with(foo, nil)
     foo.close
   end
 
@@ -391,11 +391,19 @@ describe ChetanPatil do
     cp.aasm_current_state.should == :showering
   end
 
-  it 'should transition to default state when on_transition invoked' do
+  it 'should transition to default state when first parameter isn''t a symbol' do
     cp = ChetanPatil.new
-    cp.dress!(nil, 'purple', 'dressy')
+    cp.dress!('purple', 'dressy')
 
     cp.aasm_current_state.should == :working
+  end
+
+  it 'should call on_transition method with args if first parameter isn''t a symbol' do
+    cp = ChetanPatil.new
+    cp.wakeup! :showering
+
+    cp.should_receive(:wear_clothes).with('blue', 'jeans')
+    cp.dress! 'blue', 'jeans'
   end
 
   it 'should call on_transition method with args' do

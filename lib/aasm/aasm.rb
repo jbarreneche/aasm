@@ -143,8 +143,9 @@ module AASM
 
     # new event before callback
     event.call_action(:before, self)
-
-    new_state_name = event.fire(self, *args)
+    
+    target_state = args.size > 0 && (args[0].is_a? Symbol) ? args.shift : nil
+    new_state_name = event.fire(self, target_state, *args)
 
     unless new_state_name.nil?
       new_state = aasm_state_object_for_state(new_state_name)
