@@ -103,7 +103,7 @@ module AASM
   private
   def set_aasm_current_state_with_persistence(state)
     save_success = true
-    if self.respond_to?(:aasm_write_state) || self.private_methods.include?('aasm_write_state')
+    if self.respond_to?(:aasm_write_state, true)
       save_success = aasm_write_state(state)
     end
     self.aasm_current_state = state if save_success
@@ -143,19 +143,19 @@ module AASM
 
     # new event before callback
     event.call_action(:before, self)
-    
+
     target_state = args.size > 0 && (args[0].is_a? Symbol) ? args.shift : nil
     new_state_name = event.fire(self, target_state, *args)
 
     unless new_state_name.nil?
       new_state = aasm_state_object_for_state(new_state_name)
-    
+
       # new before_ callbacks
       old_state.call_action(:before_exit, self)
       new_state.call_action(:before_enter, self)
-      
+
       new_state.call_action(:enter, self)
-      
+
       persist_successful = true
       if persist
         persist_successful = set_aasm_current_state_with_persistence(new_state_name)
@@ -164,7 +164,7 @@ module AASM
         self.aasm_current_state = new_state_name
       end
 
-      if persist_successful 
+      if persist_successful
         old_state.call_action(:after_exit, self)
         new_state.call_action(:after_enter, self)
         event.call_action(:after, self)
@@ -184,3 +184,4 @@ module AASM
     end
   end
 end
+
